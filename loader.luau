@@ -1,12 +1,13 @@
 -- ========================================
--- TWISTEDHOOK v2.1 - Mobile Optimized
+-- TWISTEDHOOK v2.2 - Mobile Optimized
 -- Roblox Rivals Exploit | Mobile Compatible
+-- With FOV Circles for Aimbot
 -- ========================================
 
 if not getgenv().TwistedhookLoaded then
     getgenv().TwistedhookLoaded = true
     
-    print("[TWISTEDHOOK] Mobile version starting...")
+    print("[TWISTEDHOOK] Mobile version v2.2 starting...")
     
     -- ==================== CORE SETUP ====================
     local Players = game:GetService("Players")
@@ -24,7 +25,7 @@ if not getgenv().TwistedhookLoaded then
     local Config = {
         MenuVisible = true,
         ESP = { Enabled = false, Distance = 1000, ShowHealth = true, WallPenetration = true },
-        Aimbot = { Enabled = false, Smoothness = 0.15, FOV = 300, SilentAim = true, Strength = 2 },
+        Aimbot = { Enabled = false, Smoothness = 0.15, FOV = 300, SilentAim = true, Strength = 2, ShowFOV = true },
         Movement = { SpeedBoost = false, Speed = 2, Teleport = false },
         AntiDetection = { Randomization = true, BehaviorMimicking = true, RateLimit = true },
         AutoEquip = false,
@@ -50,6 +51,86 @@ if not getgenv().TwistedhookLoaded then
         return
     end
     
+    -- ==================== FOV CIRCLE DRAWING ====================
+    local FOVGui = Instance.new("ScreenGui")
+    FOVGui.Name = "FOVCircles"
+    FOVGui.ResetOnSpawn = false
+    FOVGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    FOVGui.Parent = PlayerGui
+    
+    local function CreateFOVCircle()
+        local canvas = Instance.new("Frame")
+        canvas.Name = "FOVCanvas"
+        canvas.Size = UDim2.new(1, 0, 1, 0)
+        canvas.BackgroundTransparency = 1
+        canvas.BorderSizePixel = 0
+        canvas.Parent = FOVGui
+        
+        return canvas
+    end
+    
+    local FOVCircle = CreateFOVCircle()
+    
+    local function DrawFOVCircle()
+        if not Config.Aimbot.ShowFOV or not Config.Aimbot.Enabled then
+            FOVCircle:ClearAllChildren()
+            return
+        end
+        
+        pcall(function()
+            FOVCircle:ClearAllChildren()
+            
+            local mousePos = Mouse.Position
+            local radius = Config.Aimbot.FOV
+            
+            -- Draw circle using lines
+            local segments = 32
+            for i = 1, segments do
+                local angle1 = (i - 1) * (2 * math.pi / segments)
+                local angle2 = i * (2 * math.pi / segments)
+                
+                local x1 = math.cos(angle1) * radius
+                local y1 = math.sin(angle1) * radius
+                local x2 = math.cos(angle2) * radius
+                local y2 = math.sin(angle2) * radius
+                
+                local line = Instance.new("Frame")
+                line.BackgroundColor3 = Color3.fromRGB(100, 200, 255)
+                line.BorderSizePixel = 0
+                line.Parent = FOVCircle
+                
+                -- Calculate line position and rotation
+                local length = math.sqrt((x2 - x1)^2 + (y2 - y1)^2)
+                local angle = math.atan2(y2 - y1, x2 - x1)
+                
+                line.Size = UDim2.new(0, length, 0, 1)
+                line.Position = UDim2.new(0, mousePos.X + x1, 0, mousePos.Y + y1)
+                
+                local rotation = math.deg(angle)
+                line.Rotation = rotation
+            end
+            
+            -- Draw center dot
+            local center = Instance.new("Frame")
+            center.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+            center.Size = UDim2.new(0, 6, 0, 6)
+            center.Position = UDim2.new(0, mousePos.X - 3, 0, mousePos.Y - 3)
+            center.BorderSizePixel = 0
+            center.Parent = FOVCircle
+            
+            local centerCorner = Instance.new("UICorner")
+            centerCorner.CornerRadius = UDim.new(0.5, 0)
+            centerCorner.Parent = center
+        end)
+    end
+    
+    -- Update FOV circle every frame
+    RunService.RenderStepped:Connect(function()
+        DrawFOVCircle()
+    end)
+    
+    print("[TWISTEDHOOK] FOV Circle system initialized")
+    
     -- ==================== ENHANCED UI - MOBILE FRIENDLY ====================
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = "TwistedhookUI"
@@ -60,7 +141,7 @@ if not getgenv().TwistedhookLoaded then
     -- Main Menu Frame - Mobile Optimized
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "MainMenu"
-    MainFrame.Size = UDim2.new(0, 340, 0, 520)
+    MainFrame.Size = UDim2.new(0, 340, 0, 580)
     MainFrame.Position = UDim2.new(0.5, -170, 0.05, 0)
     MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
     MainFrame.BorderSizePixel = 0
@@ -135,7 +216,7 @@ if not getgenv().TwistedhookLoaded then
     ScrollFrame.BorderSizePixel = 0
     ScrollFrame.ScrollBarThickness = 6
     ScrollFrame.ScrollBarImageColor3 = Color3.fromRGB(150, 80, 220)
-    ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 650)
+    ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 750)
     ScrollFrame.Parent = MainFrame
     
     local UIListLayout = Instance.new("UIListLayout")
@@ -226,6 +307,10 @@ if not getgenv().TwistedhookLoaded then
     
     CreateToggleButton(ScrollFrame, "Silent Aim", "🔇", function(state)
         Config.Aimbot.SilentAim = state
+    end)
+    
+    CreateToggleButton(ScrollFrame, "Show FOV Circle", "⭕", function(state)
+        Config.Aimbot.ShowFOV = state
     end)
     
     CreateToggleButton(ScrollFrame, "Speed Boost", "⚡", function(state)
@@ -538,10 +623,11 @@ if not getgenv().TwistedhookLoaded then
         setthreadidentity(2)
     end
     
-    print("✓✓✓ TWISTEDHOOK v2.1 LOADED ✓✓✓")
+    print("✓✓✓ TWISTEDHOOK v2.2 LOADED ✓✓✓")
     print("✓ Mobile optimized")
     print("✓ Powerful ESP (shows through walls)")
     print("✓ Stronger aimbot")
+    print("✓ FOV circles for all aim modes")
     print("✓ Game-stable")
     print("✓ Press 'P' to toggle menu")
     print("✓ Ready for Rivals!")
