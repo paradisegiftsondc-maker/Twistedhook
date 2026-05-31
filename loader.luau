@@ -1,6 +1,7 @@
 -- ========================================
--- TWISTEDHOOK v3 - Complete Rewrite
+-- TWISTEDHOOK v3.1 - Complete Edition
 -- Roblox Rivals Exploit | All Features Working
+-- Silent Aim + Skin Changer + Fixed FOV Circle
 -- ========================================
 
 if getgenv().TwistedhookLoaded then
@@ -9,7 +10,7 @@ if getgenv().TwistedhookLoaded then
 end
 
 getgenv().TwistedhookLoaded = true
-print("[TWISTEDHOOK v3] Initializing...")
+print("[TWISTEDHOOK v3.1] Initializing...")
 
 -- Core Services
 local Players = game:GetService("Players")
@@ -22,8 +23,9 @@ local Mouse = LocalPlayer:GetMouse()
 -- Config
 local Config = {
     ESP = { Enabled = false, ShowHealth = true },
-    Aimbot = { Enabled = false, FOV = 300, Smoothness = 0.1, Strength = 3 },
+    Aimbot = { Enabled = false, FOV = 300, Smoothness = 0.1, Strength = 3, ShowFOV = false, SilentAim = false },
     Speed = { Enabled = false, Value = 2 },
+    Skins = { Enabled = false, SkinColor = Color3.fromRGB(100, 0, 200) },
 }
 
 -- Wait for GUI
@@ -39,7 +41,7 @@ MainGui.Parent = PlayerGui
 -- Menu Frame
 local MenuFrame = Instance.new("Frame")
 MenuFrame.Name = "Menu"
-MenuFrame.Size = UDim2.new(0, 320, 0, 450)
+MenuFrame.Size = UDim2.new(0, 320, 0, 520)
 MenuFrame.Position = UDim2.new(0.5, -160, 0.1, 0)
 MenuFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
 MenuFrame.BorderSizePixel = 0
@@ -62,7 +64,7 @@ Title.BorderSizePixel = 0
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 18
 Title.Font = Enum.Font.GothamBold
-Title.Text = "⚡ TWISTEDHOOK v3"
+Title.Text = "⚡ TWISTEDHOOK v3.1"
 Title.Parent = MenuFrame
 
 local TitleCorner = Instance.new("UICorner")
@@ -93,7 +95,7 @@ ScrollFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
 ScrollFrame.BorderSizePixel = 0
 ScrollFrame.ScrollBarThickness = 5
 ScrollFrame.ScrollBarImageColor3 = Color3.fromRGB(150, 80, 220)
-ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 500)
+ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 700)
 ScrollFrame.Parent = MenuFrame
 
 local Layout = Instance.new("UIListLayout")
@@ -177,12 +179,20 @@ CreateButton(ScrollFrame, "Aimbot", "🎯", function(state)
     Config.Aimbot.Enabled = state
 end)
 
+CreateButton(ScrollFrame, "Silent Aim", "🔇", function(state)
+    Config.Aimbot.SilentAim = state
+end)
+
 CreateButton(ScrollFrame, "FOV Circle", "⭕", function(state)
     Config.Aimbot.ShowFOV = state
 end)
 
 CreateButton(ScrollFrame, "Speed Boost", "⚡", function(state)
     Config.Speed.Enabled = state
+end)
+
+CreateButton(ScrollFrame, "Skin Changer", "🎨", function(state)
+    Config.Skins.Enabled = state
 end)
 
 print("[TWISTEDHOOK] Buttons created")
@@ -360,10 +370,11 @@ end)
 
 print("[TWISTEDHOOK] ESP system loaded")
 
--- ==================== FOV CIRCLE ====================
+-- ==================== FOV CIRCLE (FOLLOWS MOUSE) ====================
 local FOVGui = Instance.new("ScreenGui")
 FOVGui.Name = "FOVGui"
 FOVGui.ResetOnSpawn = false
+FOVGui.ZIndex = 1
 FOVGui.Parent = PlayerGui
 
 local FOVCanvas = Instance.new("Frame")
@@ -371,58 +382,64 @@ FOVCanvas.Name = "Canvas"
 FOVCanvas.Size = UDim2.new(1, 0, 1, 0)
 FOVCanvas.BackgroundTransparency = 1
 FOVCanvas.BorderSizePixel = 0
+FOVCanvas.ZIndex = 1
 FOVCanvas.Parent = FOVGui
 
 local function DrawFOVCircle()
-    FOVCanvas:ClearAllChildren()
-    
     if not Config.Aimbot.ShowFOV or not Config.Aimbot.Enabled then
+        FOVCanvas:ClearAllChildren()
         return
     end
     
-    local centerX = Mouse.X
-    local centerY = Mouse.Y
-    local radius = Config.Aimbot.FOV
-    local segments = 30
-    
-    for i = 1, segments do
-        local angle1 = (i - 1) * (2 * math.pi / segments)
-        local angle2 = i * (2 * math.pi / segments)
+    pcall(function()
+        FOVCanvas:ClearAllChildren()
         
-        local x1 = math.cos(angle1) * radius
-        local y1 = math.sin(angle1) * radius
-        local x2 = math.cos(angle2) * radius
-        local y2 = math.sin(angle2) * radius
+        local centerX = Mouse.X
+        local centerY = Mouse.Y
+        local radius = Config.Aimbot.FOV
+        local segments = 30
         
-        local line = Instance.new("Frame")
-        line.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
-        line.BorderSizePixel = 0
-        line.Parent = FOVCanvas
+        for i = 1, segments do
+            local angle1 = (i - 1) * (2 * math.pi / segments)
+            local angle2 = i * (2 * math.pi / segments)
+            
+            local x1 = math.cos(angle1) * radius
+            local y1 = math.sin(angle1) * radius
+            local x2 = math.cos(angle2) * radius
+            local y2 = math.sin(angle2) * radius
+            
+            local line = Instance.new("Frame")
+            line.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+            line.BorderSizePixel = 0
+            line.ZIndex = 1
+            line.Parent = FOVCanvas
+            
+            local length = math.sqrt((x2 - x1)^2 + (y2 - y1)^2)
+            local angle = math.atan2(y2 - y1, x2 - x1)
+            
+            line.Size = UDim2.new(0, length, 0, 1)
+            line.Position = UDim2.new(0, centerX + x1, 0, centerY + y1)
+            line.Rotation = math.deg(angle)
+        end
         
-        local length = math.sqrt((x2 - x1)^2 + (y2 - y1)^2)
-        local angle = math.atan2(y2 - y1, x2 - x1)
+        -- Center dot
+        local dot = Instance.new("Frame")
+        dot.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+        dot.Size = UDim2.new(0, 5, 0, 5)
+        dot.Position = UDim2.new(0, centerX - 2.5, 0, centerY - 2.5)
+        dot.BorderSizePixel = 0
+        dot.ZIndex = 1
+        dot.Parent = FOVCanvas
         
-        line.Size = UDim2.new(0, length, 0, 1)
-        line.Position = UDim2.new(0, centerX + x1, 0, centerY + y1)
-        line.Rotation = math.deg(angle)
-    end
-    
-    -- Center dot
-    local dot = Instance.new("Frame")
-    dot.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-    dot.Size = UDim2.new(0, 5, 0, 5)
-    dot.Position = UDim2.new(0, centerX - 2.5, 0, centerY - 2.5)
-    dot.BorderSizePixel = 0
-    dot.Parent = FOVCanvas
-    
-    local dotCorner = Instance.new("UICorner")
-    dotCorner.CornerRadius = UDim.new(0.5, 0)
-    dotCorner.Parent = dot
+        local dotCorner = Instance.new("UICorner")
+        dotCorner.CornerRadius = UDim.new(0.5, 0)
+        dotCorner.Parent = dot
+    end)
 end
 
 print("[TWISTEDHOOK] FOV circle created")
 
--- ==================== AIMBOT ====================
+-- ==================== AIMBOT + SILENT AIM ====================
 local function FindClosestEnemy()
     if not LocalPlayer.Character then return nil end
     
@@ -459,12 +476,58 @@ local function UpdateAimbot()
     local target = FindClosestEnemy()
     if target then
         local targetPos = target.Position + target.AssemblyLinearVelocity * 0.15
-        local newCFrame = CFrame.new(Camera.CFrame.Position, targetPos)
-        Camera.CFrame = Camera.CFrame:Lerp(newCFrame, Config.Aimbot.Smoothness * Config.Aimbot.Strength)
+        
+        if Config.Aimbot.SilentAim then
+            -- Silent Aim: Move mouse to target position on screen
+            local screenPos = Camera:WorldToScreenPoint(targetPos)
+            Mouse.X = screenPos.X
+            Mouse.Y = screenPos.Y
+        else
+            -- Regular Aimbot: Move camera
+            local newCFrame = CFrame.new(Camera.CFrame.Position, targetPos)
+            Camera.CFrame = Camera.CFrame:Lerp(newCFrame, Config.Aimbot.Smoothness * Config.Aimbot.Strength)
+        end
     end
 end
 
 print("[TWISTEDHOOK] Aimbot system loaded")
+
+-- ==================== SKIN CHANGER ====================
+local function ChangeSkin()
+    if not Config.Skins.Enabled or not LocalPlayer.Character then return end
+    
+    pcall(function()
+        local character = LocalPlayer.Character
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        
+        if humanoidRootPart then
+            for _, part in pairs(character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.Color = Config.Skins.SkinColor
+                    part.Material = Enum.Material.Neon
+                end
+            end
+        end
+    end)
+end
+
+local lastSkinUpdate = 0
+local function UpdateSkins()
+    if not Config.Skins.Enabled then return end
+    if tick() - lastSkinUpdate < 0.5 then return end
+    
+    lastSkinUpdate = tick()
+    ChangeSkin()
+end
+
+LocalPlayer.CharacterAdded:Connect(function()
+    if Config.Skins.Enabled then
+        wait(0.1)
+        ChangeSkin()
+    end
+end)
+
+print("[TWISTEDHOOK] Skin changer loaded")
 
 -- ==================== SPEED BOOST ====================
 local OriginalSpeed = 16
@@ -488,12 +551,26 @@ end)
 
 print("[TWISTEDHOOK] Speed system loaded")
 
+-- ==================== GAME TRANSITION FIX ====================
+game:GetService("RunService").Heartbeat:Connect(function()
+    if not PlayerGui or PlayerGui.Parent ~= LocalPlayer then
+        PlayerGui = LocalPlayer:FindFirstChild("PlayerGui")
+        if PlayerGui and MainGui.Parent ~= PlayerGui then
+            MainGui.Parent = PlayerGui
+            FOVGui.Parent = PlayerGui
+        end
+    end
+end)
+
+print("[TWISTEDHOOK] Game transition fix loaded")
+
 -- ==================== MAIN LOOP ====================
 RunService.Heartbeat:Connect(function()
     pcall(function()
         UpdateESP()
         UpdateAimbot()
         UpdateSpeed()
+        UpdateSkins()
     end)
 end)
 
@@ -513,9 +590,11 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
-print("✓✓✓ TWISTEDHOOK v3 LOADED ✓✓✓")
+print("✓✓✓ TWISTEDHOOK v3.1 LOADED ✓✓✓")
 print("✓ ESP working (shows through walls)")
-print("✓ Aimbot working")
-print("✓ FOV circles working")
-print("✓ Speed boost working")
+print("✓ Aimbot + Silent Aim")
+print("✓ FOV circles (follows mouse)")
+print("✓ Speed boost")
+print("✓ Skin changer (neon glow)")
+print("✓ Game transition fixed")
 print("✓ Press 'P' to toggle menu")
