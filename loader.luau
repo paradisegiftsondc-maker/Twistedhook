@@ -1,5 +1,5 @@
 -- ========================================
--- TWISTEDHOOK v2.2 - Mobile Optimized
+-- TWISTEDHOOK v2.3 - Mobile Optimized (Fixed)
 -- Roblox Rivals Exploit | Mobile Compatible
 -- With FOV Circles for Aimbot
 -- ========================================
@@ -7,7 +7,7 @@
 if not getgenv().TwistedhookLoaded then
     getgenv().TwistedhookLoaded = true
     
-    print("[TWISTEDHOOK] Mobile version v2.2 starting...")
+    print("[TWISTEDHOOK] Mobile version v2.3 starting...")
     
     -- ==================== CORE SETUP ====================
     local Players = game:GetService("Players")
@@ -18,136 +18,60 @@ if not getgenv().TwistedhookLoaded then
     local Mouse = LocalPlayer:GetMouse()
     
     if setthreadidentity then
-        setthreadidentity(2)
+        pcall(function() setthreadidentity(2) end)
     end
     
     -- ==================== CONFIGURATION ====================
     local Config = {
         MenuVisible = true,
-        ESP = { Enabled = false, Distance = 1000, ShowHealth = true, WallPenetration = true },
-        Aimbot = { Enabled = false, Smoothness = 0.15, FOV = 300, SilentAim = true, Strength = 2, ShowFOV = true },
-        Movement = { SpeedBoost = false, Speed = 2, Teleport = false },
-        AntiDetection = { Randomization = true, BehaviorMimicking = true, RateLimit = true },
-        AutoEquip = false,
-        FastReload = false,
-        BetterAccuracy = false,
+        ESP = { Enabled = false, Distance = 1000, ShowHealth = true },
+        Aimbot = { Enabled = false, Smoothness = 0.15, FOV = 300, SilentAim = true, Strength = 2, ShowFOV = false },
+        Movement = { SpeedBoost = false, Speed = 2 },
+        AntiDetection = { Randomization = true },
     }
     
-    -- Wait for PlayerGui with timeout
-    local PlayerGui
-    local attempts = 0
-    while not PlayerGui and attempts < 10 do
-        attempts = attempts + 1
-        pcall(function()
-            PlayerGui = LocalPlayer:FindFirstChild("PlayerGui")
-        end)
-        if not PlayerGui then
-            wait(0.5)
-        end
-    end
+    -- ==================== WAIT FOR PLAYERGUI ====================
+    local PlayerGui = LocalPlayer:WaitForChild("PlayerGui", 10)
     
     if not PlayerGui then
-        print("[TWISTEDHOOK] ERROR: Could not find PlayerGui")
+        print("[TWISTEDHOOK] ERROR: PlayerGui not found")
         return
     end
     
-    -- ==================== FOV CIRCLE DRAWING ====================
+    print("[TWISTEDHOOK] PlayerGui found")
+    
+    -- ==================== SIMPLE FOV CIRCLE ====================
     local FOVGui = Instance.new("ScreenGui")
     FOVGui.Name = "FOVCircles"
     FOVGui.ResetOnSpawn = false
     FOVGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     FOVGui.Parent = PlayerGui
     
-    local function CreateFOVCircle()
-        local canvas = Instance.new("Frame")
-        canvas.Name = "FOVCanvas"
-        canvas.Size = UDim2.new(1, 0, 1, 0)
-        canvas.BackgroundTransparency = 1
-        canvas.BorderSizePixel = 0
-        canvas.Parent = FOVGui
-        
-        return canvas
-    end
+    local FOVCanvas = Instance.new("Frame")
+    FOVCanvas.Name = "FOVCanvas"
+    FOVCanvas.Size = UDim2.new(1, 0, 1, 0)
+    FOVCanvas.BackgroundTransparency = 1
+    FOVCanvas.BorderSizePixel = 0
+    FOVCanvas.Parent = FOVGui
     
-    local FOVCircle = CreateFOVCircle()
+    print("[TWISTEDHOOK] FOV Canvas created")
     
-    local function DrawFOVCircle()
-        if not Config.Aimbot.ShowFOV or not Config.Aimbot.Enabled then
-            FOVCircle:ClearAllChildren()
-            return
-        end
-        
-        pcall(function()
-            FOVCircle:ClearAllChildren()
-            
-            local mousePos = Mouse.Position
-            local radius = Config.Aimbot.FOV
-            
-            -- Draw circle using lines
-            local segments = 32
-            for i = 1, segments do
-                local angle1 = (i - 1) * (2 * math.pi / segments)
-                local angle2 = i * (2 * math.pi / segments)
-                
-                local x1 = math.cos(angle1) * radius
-                local y1 = math.sin(angle1) * radius
-                local x2 = math.cos(angle2) * radius
-                local y2 = math.sin(angle2) * radius
-                
-                local line = Instance.new("Frame")
-                line.BackgroundColor3 = Color3.fromRGB(100, 200, 255)
-                line.BorderSizePixel = 0
-                line.Parent = FOVCircle
-                
-                -- Calculate line position and rotation
-                local length = math.sqrt((x2 - x1)^2 + (y2 - y1)^2)
-                local angle = math.atan2(y2 - y1, x2 - x1)
-                
-                line.Size = UDim2.new(0, length, 0, 1)
-                line.Position = UDim2.new(0, mousePos.X + x1, 0, mousePos.Y + y1)
-                
-                local rotation = math.deg(angle)
-                line.Rotation = rotation
-            end
-            
-            -- Draw center dot
-            local center = Instance.new("Frame")
-            center.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-            center.Size = UDim2.new(0, 6, 0, 6)
-            center.Position = UDim2.new(0, mousePos.X - 3, 0, mousePos.Y - 3)
-            center.BorderSizePixel = 0
-            center.Parent = FOVCircle
-            
-            local centerCorner = Instance.new("UICorner")
-            centerCorner.CornerRadius = UDim.new(0.5, 0)
-            centerCorner.Parent = center
-        end)
-    end
-    
-    -- Update FOV circle every frame
-    RunService.RenderStepped:Connect(function()
-        DrawFOVCircle()
-    end)
-    
-    print("[TWISTEDHOOK] FOV Circle system initialized")
-    
-    -- ==================== ENHANCED UI - MOBILE FRIENDLY ====================
+    -- ==================== MAIN UI ====================
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = "TwistedhookUI"
     ScreenGui.ResetOnSpawn = false
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     ScreenGui.Parent = PlayerGui
     
-    -- Main Menu Frame - Mobile Optimized
+    -- Main Menu Frame
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "MainMenu"
-    MainFrame.Size = UDim2.new(0, 340, 0, 580)
+    MainFrame.Size = UDim2.new(0, 340, 0, 520)
     MainFrame.Position = UDim2.new(0.5, -170, 0.05, 0)
     MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
     MainFrame.BorderSizePixel = 0
     MainFrame.Parent = ScreenGui
     
-    -- Add shadow effect
     local UICorner = Instance.new("UICorner")
     UICorner.CornerRadius = UDim.new(0, 12)
     UICorner.Parent = MainFrame
@@ -157,7 +81,7 @@ if not getgenv().TwistedhookLoaded then
     UIStroke.Thickness = 2
     UIStroke.Parent = MainFrame
     
-    -- Title Bar - Mobile Optimized
+    -- Title Bar
     local TitleBar = Instance.new("Frame")
     TitleBar.Name = "TitleBar"
     TitleBar.Size = UDim2.new(1, 0, 0, 55)
@@ -169,7 +93,6 @@ if not getgenv().TwistedhookLoaded then
     TitleCorner.CornerRadius = UDim.new(0, 12)
     TitleCorner.Parent = TitleBar
     
-    -- Title Text
     local Title = Instance.new("TextLabel")
     Title.Name = "Title"
     Title.Size = UDim2.new(1, -100, 1, 0)
@@ -216,7 +139,7 @@ if not getgenv().TwistedhookLoaded then
     ScrollFrame.BorderSizePixel = 0
     ScrollFrame.ScrollBarThickness = 6
     ScrollFrame.ScrollBarImageColor3 = Color3.fromRGB(150, 80, 220)
-    ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 750)
+    ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 650)
     ScrollFrame.Parent = MainFrame
     
     local UIListLayout = Instance.new("UIListLayout")
@@ -232,7 +155,7 @@ if not getgenv().TwistedhookLoaded then
     
     print("[TWISTEDHOOK] UI created")
     
-    -- ==================== FEATURE BUTTONS ====================
+    -- ==================== TOGGLE BUTTON FUNCTION ====================
     local function CreateToggleButton(parent, name, icon, callback)
         local Button = Instance.new("TextButton")
         Button.Name = name
@@ -294,9 +217,10 @@ if not getgenv().TwistedhookLoaded then
             UpdateButton()
         end)
         
-        return Button, function() return State end
+        return Button
     end
     
+    -- Create buttons
     CreateToggleButton(ScrollFrame, "ESP", "👁", function(state)
         Config.ESP.Enabled = state
     end)
@@ -325,10 +249,6 @@ if not getgenv().TwistedhookLoaded then
         Config.AutoEquip = state
     end)
     
-    CreateToggleButton(ScrollFrame, "Fast Reload", "⏱", function(state)
-        Config.FastReload = state
-    end)
-    
     CreateToggleButton(ScrollFrame, "Anti-Detection", "🛡", function(state)
         Config.AntiDetection.Randomization = state
     end)
@@ -342,7 +262,7 @@ if not getgenv().TwistedhookLoaded then
     
     TitleBar.InputBegan:Connect(function(input, gameProcessed)
         if gameProcessed then return end
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = true
             dragStart = Mouse.Position
             frameStart = MainFrame.Position
@@ -350,7 +270,7 @@ if not getgenv().TwistedhookLoaded then
     end)
     
     UserInputService.InputEnded:Connect(function(input, gameProcessed)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = false
         end
     end)
@@ -395,71 +315,17 @@ if not getgenv().TwistedhookLoaded then
         minButton.Visible = false
     end)
     
-    print("[TWISTEDHOOK] Minimize button working")
+    print("[TWISTEDHOOK] Menu setup complete")
     
-    -- ==================== POWERFUL ESP - MOBILE OPTIMIZED ====================
+    -- ==================== VARIABLES ====================
     local ESPCache = {}
     local LastESPUpdate = 0
     local OriginalSpeed = 16
     
-    local function CreateESPBox(humanoidRootPart, player)
-        pcall(function()
-            local billboardGui = Instance.new("BillboardGui")
-            billboardGui.Adornee = humanoidRootPart
-            billboardGui.MaxDistance = Config.ESP.Distance
-            billboardGui.Size = UDim2.new(5, 0, 6, 0)
-            billboardGui.MaxDistance = math.huge -- Show from ANY distance
-            billboardGui.Parent = humanoidRootPart
-            
-            local frame = Instance.new("Frame")
-            frame.BackgroundColor3 = Color3.fromRGB(100, 0, 200)
-            frame.BackgroundTransparency = 0.1
-            frame.Size = UDim2.new(1, 0, 1, 0)
-            frame.BorderSizePixel = 0
-            frame.Parent = billboardGui
-            
-            -- Stronger outline
-            local uiStroke = Instance.new("UIStroke")
-            uiStroke.Color = Color3.fromRGB(200, 100, 255)
-            uiStroke.Thickness = 3
-            uiStroke.Parent = frame
-            
-            -- Player name
-            local nameLabel = Instance.new("TextLabel")
-            nameLabel.BackgroundTransparency = 1
-            nameLabel.Size = UDim2.new(1, 0, 0.3, 0)
-            nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-            nameLabel.TextSize = 16
-            nameLabel.Font = Enum.Font.GothamBold
-            nameLabel.Text = player.Name
-            nameLabel.Parent = frame
-            
-            -- Health bar
-            if Config.ESP.ShowHealth then
-                local healthBg = Instance.new("Frame")
-                healthBg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-                healthBg.BackgroundTransparency = 0.3
-                healthBg.Size = UDim2.new(0.8, 0, 0.15, 0)
-                healthBg.Position = UDim2.new(0.1, 0, 0.7, 0)
-                healthBg.BorderSizePixel = 0
-                healthBg.Parent = frame
-                
-                local healthBar = Instance.new("Frame")
-                healthBar.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-                healthBar.Size = UDim2.new(1, 0, 1, 0)
-                healthBar.BorderSizePixel = 0
-                healthBar.Parent = healthBg
-                
-                return billboardGui, healthBar
-            end
-            
-            return billboardGui
-        end)
-    end
-    
+    -- ==================== ESP FUNCTION ====================
     local function UpdateESP()
         if not Config.ESP.Enabled then return end
-        if tick() - LastESPUpdate < 0.05 then return end
+        if tick() - LastESPUpdate < 0.1 then return end
         
         LastESPUpdate = tick()
         
@@ -470,28 +336,69 @@ if not getgenv().TwistedhookLoaded then
                     local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
                     local humanoid = character:FindFirstChild("Humanoid")
                     
-                    if humanoidRootPart and humanoid then
-                        if not ESPCache[player] then
-                            local billboard, healthBar = CreateESPBox(humanoidRootPart, player)
-                            ESPCache[player] = {
-                                billboard = billboard,
-                                healthBar = healthBar,
-                                lastHealth = humanoid.Health
-                            }
-                        else
-                            -- Update health bar
-                            if Config.ESP.ShowHealth and ESPCache[player].healthBar then
-                                local healthPercent = math.max(0, humanoid.Health / humanoid.MaxHealth)
-                                ESPCache[player].healthBar.Size = UDim2.new(math.max(0, healthPercent), 0, 1, 0)
-                            end
-                        end
+                    if humanoidRootPart and humanoid and not ESPCache[player] then
+                        local billboard = Instance.new("BillboardGui")
+                        billboard.Adornee = humanoidRootPart
+                        billboard.MaxDistance = math.huge
+                        billboard.Size = UDim2.new(4, 0, 5, 0)
+                        billboard.Parent = humanoidRootPart
+                        
+                        local frame = Instance.new("Frame")
+                        frame.BackgroundColor3 = Color3.fromRGB(100, 0, 200)
+                        frame.BackgroundTransparency = 0.3
+                        frame.Size = UDim2.new(1, 0, 1, 0)
+                        frame.BorderSizePixel = 0
+                        frame.Parent = billboard
+                        
+                        local stroke = Instance.new("UIStroke")
+                        stroke.Color = Color3.fromRGB(200, 100, 255)
+                        stroke.Thickness = 2
+                        stroke.Parent = frame
+                        
+                        ESPCache[player] = billboard
                     end
                 end
             end
         end)
     end
     
-    -- Speed Boost
+    -- ==================== AIMBOT FUNCTION ====================
+    local function UpdateAimbot()
+        if not Config.Aimbot.Enabled or not LocalPlayer.Character then return end
+        
+        pcall(function()
+            local myRoot = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if not myRoot then return end
+            
+            local closest = nil
+            local closestDistance = Config.Aimbot.FOV
+            
+            for _, player in pairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer and player.Character then
+                    local humanoidRootPart = player.Character:FindFirstChild("HumanoidRootPart")
+                    local humanoid = player.Character:FindFirstChild("Humanoid")
+                    
+                    if humanoidRootPart and humanoid and humanoid.Health > 0 then
+                        local screenPos = Camera:WorldToScreenPoint(humanoidRootPart.Position)
+                        local mousePos = Vector2.new(Mouse.X, Mouse.Y)
+                        local dist = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
+                        
+                        if dist < closestDistance then
+                            closest = humanoidRootPart
+                            closestDistance = dist
+                        end
+                    end
+                end
+            end
+            
+            if closest and Config.Aimbot.SilentAim then
+                local targetCFrame = CFrame.new(Camera.CFrame.Position, closest.Position)
+                Camera.CFrame = Camera.CFrame:Lerp(targetCFrame, Config.Aimbot.Smoothness * Config.Aimbot.Strength)
+            end
+        end)
+    end
+    
+    -- ==================== SPEED FUNCTION ====================
     local function UpdateSpeed()
         if not Config.Movement.SpeedBoost or not LocalPlayer.Character then return end
         
@@ -499,45 +406,6 @@ if not getgenv().TwistedhookLoaded then
             local humanoid = LocalPlayer.Character:FindFirstChild("Humanoid")
             if humanoid then
                 humanoid.WalkSpeed = OriginalSpeed * Config.Movement.Speed
-            end
-        end)
-    end
-    
-    -- STRONGER AIMBOT
-    local function UpdateAimbot()
-        if not Config.Aimbot.Enabled or not LocalPlayer.Character then return end
-        
-        pcall(function()
-            local closest = nil
-            local closestDistance = Config.Aimbot.FOV
-            
-            local myRoot = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-            if not myRoot then return end
-            
-            for _, player in pairs(Players:GetPlayers()) do
-                if player ~= LocalPlayer and player.Character then
-                    local character = player.Character
-                    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-                    local humanoid = character:FindFirstChild("Humanoid")
-                    
-                    if humanoidRootPart and humanoid and humanoid.Health > 0 then
-                        local distance = (humanoidRootPart.Position - myRoot.Position).Magnitude
-                        local screenPos = Camera:WorldToScreenPoint(humanoidRootPart.Position)
-                        local mousePos = Vector2.new(Mouse.X, Mouse.Y)
-                        local distanceToMouse = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
-                        
-                        if distance <= Config.Aimbot.FOV and distanceToMouse < closestDistance then
-                            closest = humanoidRootPart
-                            closestDistance = distanceToMouse
-                        end
-                    end
-                end
-            end
-            
-            if closest and Config.Aimbot.SilentAim then
-                -- Stronger aiming with higher strength
-                local targetCFrame = CFrame.new(Camera.CFrame.Position, closest.Position + closest.AssemblyLinearVelocity * 0.1)
-                Camera.CFrame = Camera.CFrame:Lerp(targetCFrame, Config.Aimbot.Smoothness * Config.Aimbot.Strength)
             end
         end)
     end
@@ -553,54 +421,90 @@ if not getgenv().TwistedhookLoaded then
         end
     end
     
-    -- Main feature loop
-    local featureConnection = RunService.Heartbeat:Connect(function()
-        pcall(function()
-            if Config.ESP.Enabled then
-                UpdateESP()
+    -- ==================== FOV CIRCLE UPDATE ====================
+    local lastFOVUpdate = 0
+    local function UpdateFOVCircle()
+        if not Config.Aimbot.ShowFOV or not Config.Aimbot.Enabled then
+            if tick() - lastFOVUpdate > 0.5 then
+                FOVCanvas:ClearAllChildren()
+                lastFOVUpdate = tick()
             end
+            return
+        end
+        
+        if tick() - lastFOVUpdate < 0.016 then return end
+        lastFOVUpdate = tick()
+        
+        pcall(function()
+            FOVCanvas:ClearAllChildren()
+            
+            local mousePos = Mouse.Position
+            local radius = Config.Aimbot.FOV
+            
+            -- Draw simple circle
+            for i = 0, 30 do
+                local angle1 = (i / 30) * (2 * math.pi)
+                local angle2 = ((i + 1) / 30) * (2 * math.pi)
+                
+                local x1 = math.cos(angle1) * radius
+                local y1 = math.sin(angle1) * radius
+                local x2 = math.cos(angle2) * radius
+                local y2 = math.sin(angle2) * radius
+                
+                local line = Instance.new("Frame")
+                line.BackgroundColor3 = Color3.fromRGB(100, 200, 255)
+                line.BorderSizePixel = 0
+                line.Parent = FOVCanvas
+                
+                local length = math.sqrt((x2 - x1)^2 + (y2 - y1)^2)
+                local angle = math.atan2(y2 - y1, x2 - x1)
+                
+                line.Size = UDim2.new(0, length, 0, 1)
+                line.Position = UDim2.new(0, mousePos.X + x1, 0, mousePos.Y + y1)
+                line.Rotation = math.deg(angle)
+            end
+        end)
+    end
+    
+    -- ==================== MAIN LOOP ====================
+    local heartbeatConnection = RunService.Heartbeat:Connect(function()
+        pcall(function()
+            UpdateESP()
+            UpdateAimbot()
             
             if Config.Movement.SpeedBoost then
                 UpdateSpeed()
             else
                 ResetSpeed()
             end
-            
-            if Config.Aimbot.Enabled then
-                UpdateAimbot()
-            end
         end)
     end)
     
-    print("[TWISTEDHOOK] Features running")
+    RunService.RenderStepped:Connect(function()
+        pcall(function()
+            UpdateFOVCircle()
+        end)
+    end)
     
-    -- ==================== PLAYER MANAGEMENT ====================
+    print("[TWISTEDHOOK] Main loops started")
+    
+    -- ==================== CLEANUP ====================
     Players.PlayerRemoving:Connect(function(player)
-        pcall(function()
-            if ESPCache[player] then
-                if ESPCache[player].billboard then
-                    ESPCache[player].billboard:Destroy()
-                end
-                ESPCache[player] = nil
-            end
-        end)
+        if ESPCache[player] then
+            pcall(function()
+                ESPCache[player]:Destroy()
+            end)
+            ESPCache[player] = nil
+        end
+        
+        if player == LocalPlayer then
+            pcall(function()
+                heartbeatConnection:Disconnect()
+            end)
+        end
     end)
     
-    -- Cleanup on character respawn
-    LocalPlayer.CharacterAdded:Connect(function(newCharacter)
-        pcall(function()
-            for player, cache in pairs(ESPCache) do
-                if cache.billboard and cache.billboard.Adornee then
-                    if not cache.billboard.Adornee.Parent then
-                        pcall(function() cache.billboard:Destroy() end)
-                        ESPCache[player] = nil
-                    end
-                end
-            end
-        end)
-    end)
-    
-    -- ==================== INPUT ====================
+    -- ==================== TOGGLE MENU ====================
     UserInputService.InputBegan:Connect(function(input, gameProcessed)
         if gameProcessed then return end
         
@@ -610,27 +514,11 @@ if not getgenv().TwistedhookLoaded then
         end
     end)
     
-    -- ==================== CLEANUP ON GAME LEAVE ====================
-    Players.PlayerRemoving:Connect(function(player)
-        if player == LocalPlayer then
-            if featureConnection then
-                featureConnection:Disconnect()
-            end
-        end
-    end)
-    
-    if setthreadidentity then
-        setthreadidentity(2)
-    end
-    
-    print("✓✓✓ TWISTEDHOOK v2.2 LOADED ✓✓✓")
-    print("✓ Mobile optimized")
-    print("✓ Powerful ESP (shows through walls)")
-    print("✓ Stronger aimbot")
-    print("✓ FOV circles for all aim modes")
-    print("✓ Game-stable")
+    print("✓✓✓ TWISTEDHOOK v2.3 LOADED ✓✓✓")
+    print("✓ Fixed freeze issues")
+    print("✓ Optimized FOV circles")
+    print("✓ Mobile ready")
     print("✓ Press 'P' to toggle menu")
-    print("✓ Ready for Rivals!")
     
 else
     print("⚠ TWISTEDHOOK already loaded!")
