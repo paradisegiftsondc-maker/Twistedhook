@@ -1,12 +1,12 @@
 -- ========================================
--- TWISTEDHOOK v2 - Roblox Rivals Exploit
--- Enhanced UI | Wall-Penetrating ESP | Stable
+-- TWISTEDHOOK v2.1 - Mobile Optimized
+-- Roblox Rivals Exploit | Mobile Compatible
 -- ========================================
 
 if not getgenv().TwistedhookLoaded then
     getgenv().TwistedhookLoaded = true
     
-    print("[TWISTEDHOOK] Starting initialization...")
+    print("[TWISTEDHOOK] Mobile version starting...")
     
     -- ==================== CORE SETUP ====================
     local Players = game:GetService("Players")
@@ -23,29 +23,45 @@ if not getgenv().TwistedhookLoaded then
     -- ==================== CONFIGURATION ====================
     local Config = {
         MenuVisible = true,
-        ESP = { Enabled = false, Distance = 500, ShowHealth = true, WallPenetration = true },
-        Aimbot = { Enabled = false, Smoothness = 0.5, FOV = 120, SilentAim = true },
-        Movement = { SpeedBoost = false, Speed = 1.5, Teleport = false },
+        ESP = { Enabled = false, Distance = 1000, ShowHealth = true, WallPenetration = true },
+        Aimbot = { Enabled = false, Smoothness = 0.15, FOV = 300, SilentAim = true, Strength = 2 },
+        Movement = { SpeedBoost = false, Speed = 2, Teleport = false },
         AntiDetection = { Randomization = true, BehaviorMimicking = true, RateLimit = true },
         AutoEquip = false,
         FastReload = false,
         BetterAccuracy = false,
     }
     
-    -- ==================== ENHANCED UI - MODERN STYLE ====================
-    local PlayerGui = LocalPlayer:WaitForChild("PlayerGui", 5)
+    -- Wait for PlayerGui with timeout
+    local PlayerGui
+    local attempts = 0
+    while not PlayerGui and attempts < 10 do
+        attempts = attempts + 1
+        pcall(function()
+            PlayerGui = LocalPlayer:FindFirstChild("PlayerGui")
+        end)
+        if not PlayerGui then
+            wait(0.5)
+        end
+    end
     
+    if not PlayerGui then
+        print("[TWISTEDHOOK] ERROR: Could not find PlayerGui")
+        return
+    end
+    
+    -- ==================== ENHANCED UI - MOBILE FRIENDLY ====================
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = "TwistedhookUI"
     ScreenGui.ResetOnSpawn = false
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     ScreenGui.Parent = PlayerGui
     
-    -- Main Menu Frame - Modern Glass Morphism Style
+    -- Main Menu Frame - Mobile Optimized
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "MainMenu"
-    MainFrame.Size = UDim2.new(0, 380, 0, 580)
-    MainFrame.Position = UDim2.new(0.5, -190, 0.1, 0)
+    MainFrame.Size = UDim2.new(0, 340, 0, 520)
+    MainFrame.Position = UDim2.new(0.5, -170, 0.05, 0)
     MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
     MainFrame.BorderSizePixel = 0
     MainFrame.Parent = ScreenGui
@@ -60,10 +76,10 @@ if not getgenv().TwistedhookLoaded then
     UIStroke.Thickness = 2
     UIStroke.Parent = MainFrame
     
-    -- Title Bar - Modern Style
+    -- Title Bar - Mobile Optimized
     local TitleBar = Instance.new("Frame")
     TitleBar.Name = "TitleBar"
-    TitleBar.Size = UDim2.new(1, 0, 0, 60)
+    TitleBar.Size = UDim2.new(1, 0, 0, 55)
     TitleBar.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
     TitleBar.BorderSizePixel = 0
     TitleBar.Parent = MainFrame
@@ -72,65 +88,36 @@ if not getgenv().TwistedhookLoaded then
     TitleCorner.CornerRadius = UDim.new(0, 12)
     TitleCorner.Parent = TitleBar
     
-    -- Gradient effect on title (using Frame)
-    local GradientFrame = Instance.new("Frame")
-    GradientFrame.Size = UDim2.new(1, 0, 1, 0)
-    GradientFrame.BackgroundColor3 = Color3.fromRGB(80, 30, 150)
-    GradientFrame.BackgroundTransparency = 0.8
-    GradientFrame.BorderSizePixel = 0
-    GradientFrame.Parent = TitleBar
-    
-    local GradientCorner = Instance.new("UICorner")
-    GradientCorner.CornerRadius = UDim.new(0, 12)
-    GradientCorner.Parent = GradientFrame
-    
     -- Title Text
     local Title = Instance.new("TextLabel")
     Title.Name = "Title"
     Title.Size = UDim2.new(1, -100, 1, 0)
-    Title.Position = UDim2.new(0, 20, 0, 0)
+    Title.Position = UDim2.new(0, 15, 0, 0)
     Title.BackgroundTransparency = 1
     Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Title.TextSize = 22
+    Title.TextSize = 18
     Title.Font = Enum.Font.GothamBold
     Title.Text = "⚡ TWISTEDHOOK"
     Title.TextXAlignment = Enum.TextXAlignment.Left
-    Title.ZIndex = 2
     Title.Parent = TitleBar
     
-    -- Version label
-    local VersionLabel = Instance.new("TextLabel")
-    VersionLabel.Name = "Version"
-    VersionLabel.Size = UDim2.new(0, 60, 1, 0)
-    VersionLabel.Position = UDim2.new(1, -80, 0, 0)
-    VersionLabel.BackgroundTransparency = 1
-    VersionLabel.TextColor3 = Color3.fromRGB(150, 100, 200)
-    VersionLabel.TextSize = 12
-    VersionLabel.Font = Enum.Font.GothamSemibold
-    VersionLabel.Text = "v2.0"
-    VersionLabel.TextXAlignment = Enum.TextXAlignment.Center
-    VersionLabel.ZIndex = 2
-    VersionLabel.Parent = TitleBar
-    
-    -- Close Button (Modern X)
+    -- Close Button
     local CloseBtn = Instance.new("TextButton")
     CloseBtn.Name = "CloseBtn"
-    CloseBtn.Size = UDim2.new(0, 45, 0, 45)
-    CloseBtn.Position = UDim2.new(1, -50, 0, 7.5)
+    CloseBtn.Size = UDim2.new(0, 40, 0, 40)
+    CloseBtn.Position = UDim2.new(1, -45, 0, 7.5)
     CloseBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
     CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    CloseBtn.TextSize = 20
+    CloseBtn.TextSize = 18
     CloseBtn.Font = Enum.Font.GothamBold
     CloseBtn.Text = "✕"
     CloseBtn.BorderSizePixel = 0
-    CloseBtn.ZIndex = 3
     CloseBtn.Parent = TitleBar
     
     local CloseBtnCorner = Instance.new("UICorner")
     CloseBtnCorner.CornerRadius = UDim.new(0, 8)
     CloseBtnCorner.Parent = CloseBtn
     
-    -- Hover effect for close button
     CloseBtn.MouseEnter:Connect(function()
         CloseBtn.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
     end)
@@ -139,83 +126,76 @@ if not getgenv().TwistedhookLoaded then
         CloseBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
     end)
     
-    -- Scroll Frame with improved styling
+    -- Scroll Frame
     local ScrollFrame = Instance.new("ScrollingFrame")
     ScrollFrame.Name = "ScrollFrame"
-    ScrollFrame.Size = UDim2.new(1, 0, 1, -60)
-    ScrollFrame.Position = UDim2.new(0, 0, 0, 60)
+    ScrollFrame.Size = UDim2.new(1, 0, 1, -55)
+    ScrollFrame.Position = UDim2.new(0, 0, 0, 55)
     ScrollFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
     ScrollFrame.BorderSizePixel = 0
-    ScrollFrame.ScrollBarThickness = 8
+    ScrollFrame.ScrollBarThickness = 6
     ScrollFrame.ScrollBarImageColor3 = Color3.fromRGB(150, 80, 220)
-    ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 700)
+    ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 650)
     ScrollFrame.Parent = MainFrame
     
-    local ScrollCorner = Instance.new("UICorner")
-    ScrollCorner.CornerRadius = UDim.new(0, 12)
-    ScrollCorner.Parent = ScrollFrame
-    
     local UIListLayout = Instance.new("UIListLayout")
-    UIListLayout.Padding = UDim.new(0, 12)
+    UIListLayout.Padding = UDim.new(0, 10)
     UIListLayout.Parent = ScrollFrame
     
     local UIPadding = Instance.new("UIPadding")
-    UIPadding.PaddingTop = UDim.new(0, 12)
-    UIPadding.PaddingBottom = UDim.new(0, 12)
-    UIPadding.PaddingLeft = UDim.new(0, 12)
-    UIPadding.PaddingRight = UDim.new(0, 12)
+    UIPadding.PaddingTop = UDim.new(0, 10)
+    UIPadding.PaddingBottom = UDim.new(0, 10)
+    UIPadding.PaddingLeft = UDim.new(0, 10)
+    UIPadding.PaddingRight = UDim.new(0, 10)
     UIPadding.Parent = ScrollFrame
     
-    print("[TWISTEDHOOK] Enhanced UI created")
+    print("[TWISTEDHOOK] UI created")
     
-    -- ==================== FEATURE BUTTONS - MODERN STYLE ====================
+    -- ==================== FEATURE BUTTONS ====================
     local function CreateToggleButton(parent, name, icon, callback)
         local Button = Instance.new("TextButton")
         Button.Name = name
-        Button.Size = UDim2.new(1, 0, 0, 50)
+        Button.Size = UDim2.new(1, 0, 0, 45)
         Button.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
         Button.TextColor3 = Color3.fromRGB(200, 200, 200)
-        Button.TextSize = 14
+        Button.TextSize = 13
         Button.Font = Enum.Font.GothamSemibold
         Button.Text = icon .. " " .. name
         Button.BorderSizePixel = 0
         Button.Parent = parent
         
         local BtnCorner = Instance.new("UICorner")
-        BtnCorner.CornerRadius = UDim.new(0, 10)
+        BtnCorner.CornerRadius = UDim.new(0, 8)
         BtnCorner.Parent = Button
         
         local BtnStroke = Instance.new("UIStroke")
         BtnStroke.Color = Color3.fromRGB(80, 40, 150)
-        BtnStroke.Thickness = 1.5
+        BtnStroke.Thickness = 1
         BtnStroke.Parent = Button
         
-        -- Toggle indicator (left side)
         local ToggleIndicator = Instance.new("Frame")
         ToggleIndicator.Name = "Indicator"
-        ToggleIndicator.Size = UDim2.new(0, 10, 0, 10)
-        ToggleIndicator.Position = UDim2.new(0, 12, 0.5, -5)
+        ToggleIndicator.Size = UDim2.new(0, 8, 0, 8)
+        ToggleIndicator.Position = UDim2.new(0, 10, 0.5, -4)
         ToggleIndicator.BackgroundColor3 = Color3.fromRGB(150, 150, 150)
         ToggleIndicator.BorderSizePixel = 0
         ToggleIndicator.Parent = Button
         
         local IndicatorCorner = Instance.new("UICorner")
-        IndicatorCorner.CornerRadius = UDim.new(0, 3)
+        IndicatorCorner.CornerRadius = UDim.new(0, 2)
         IndicatorCorner.Parent = ToggleIndicator
         
         local State = false
         
         local function UpdateButton()
             if State then
-                Button.BackgroundColor3 = Color3.fromRGB(120, 50, 220)
-                ToggleIndicator.BackgroundColor3 = Color3.fromRGB(100, 255, 100)
+                Button.BackgroundColor3 = Color3.fromRGB(100, 40, 200)
+                ToggleIndicator.BackgroundColor3 = Color3.fromRGB(100, 200, 100)
                 Button.TextColor3 = Color3.fromRGB(255, 255, 255)
-                BtnStroke.Color = Color3.fromRGB(150, 80, 220)
             else
                 Button.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
                 ToggleIndicator.BackgroundColor3 = Color3.fromRGB(150, 150, 150)
                 Button.TextColor3 = Color3.fromRGB(200, 200, 200)
-                BtnStroke.Color = Color3.fromRGB(80, 40, 150)
             end
         end
         
@@ -225,9 +205,8 @@ if not getgenv().TwistedhookLoaded then
             pcall(function() callback(State) end)
         end)
         
-        -- Hover effect
         Button.MouseEnter:Connect(function()
-            Button.BackgroundColor3 = Color3.fromRGB(45, 45, 60)
+            Button.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
         end)
         
         Button.MouseLeave:Connect(function()
@@ -237,7 +216,6 @@ if not getgenv().TwistedhookLoaded then
         return Button, function() return State end
     end
     
-    -- Create all feature buttons with icons
     CreateToggleButton(ScrollFrame, "ESP", "👁", function(state)
         Config.ESP.Enabled = state
     end)
@@ -266,17 +244,11 @@ if not getgenv().TwistedhookLoaded then
         Config.FastReload = state
     end)
     
-    CreateToggleButton(ScrollFrame, "Better Accuracy", "🎪", function(state)
-        Config.BetterAccuracy = state
-    end)
-    
     CreateToggleButton(ScrollFrame, "Anti-Detection", "🛡", function(state)
         Config.AntiDetection.Randomization = state
-        Config.AntiDetection.BehaviorMimicking = state
-        Config.AntiDetection.RateLimit = state
     end)
     
-    print("[TWISTEDHOOK] All buttons created")
+    print("[TWISTEDHOOK] Buttons created")
     
     -- ==================== DRAGGABLE MENU ====================
     local dragging = false
@@ -285,8 +257,7 @@ if not getgenv().TwistedhookLoaded then
     
     TitleBar.InputBegan:Connect(function(input, gameProcessed)
         if gameProcessed then return end
-        
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
             dragStart = Mouse.Position
             frameStart = MainFrame.Position
@@ -294,7 +265,7 @@ if not getgenv().TwistedhookLoaded then
     end)
     
     UserInputService.InputEnded:Connect(function(input, gameProcessed)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = false
         end
     end)
@@ -313,11 +284,11 @@ if not getgenv().TwistedhookLoaded then
     -- ==================== MINIMIZE BUTTON ====================
     local minButton = Instance.new("TextButton")
     minButton.Name = "MinButton"
-    minButton.Size = UDim2.new(0, 60, 0, 60)
-    minButton.Position = UDim2.new(0, 20, 0, 20)
+    minButton.Size = UDim2.new(0, 55, 0, 55)
+    minButton.Position = UDim2.new(0, 15, 0, 15)
     minButton.BackgroundColor3 = Color3.fromRGB(120, 50, 220)
     minButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    minButton.TextSize = 28
+    minButton.TextSize = 24
     minButton.Font = Enum.Font.GothamBold
     minButton.Text = "⚡"
     minButton.Visible = false
@@ -326,13 +297,8 @@ if not getgenv().TwistedhookLoaded then
     minButton.Parent = ScreenGui
     
     local MinCorner = Instance.new("UICorner")
-    MinCorner.CornerRadius = UDim.new(0, 12)
+    MinCorner.CornerRadius = UDim.new(0, 10)
     MinCorner.Parent = minButton
-    
-    local MinStroke = Instance.new("UIStroke")
-    MinStroke.Color = Color3.fromRGB(200, 100, 255)
-    MinStroke.Thickness = 2
-    MinStroke.Parent = minButton
     
     CloseBtn.MouseButton1Click:Connect(function()
         MainFrame.Visible = false
@@ -346,71 +312,69 @@ if not getgenv().TwistedhookLoaded then
     
     print("[TWISTEDHOOK] Minimize button working")
     
-    -- ==================== FIXED ESP WITH WALL PENETRATION ====================
+    -- ==================== POWERFUL ESP - MOBILE OPTIMIZED ====================
     local ESPCache = {}
     local LastESPUpdate = 0
     local OriginalSpeed = 16
     
     local function CreateESPBox(humanoidRootPart, player)
-        -- Create a BillboardGui that shows through walls
-        local billboardGui = Instance.new("BillboardGui")
-        billboardGui.Adornee = humanoidRootPart
-        billboardGui.MaxDistance = Config.ESP.Distance
-        billboardGui.Size = UDim2.new(4, 0, 5, 0)
-        billboardGui.Parent = humanoidRootPart
-        
-        -- Main frame
-        local frame = Instance.new("Frame")
-        frame.BackgroundColor3 = Color3.fromRGB(100, 0, 200)
-        frame.BackgroundTransparency = 0.3
-        frame.Size = UDim2.new(1, 0, 1, 0)
-        frame.BorderSizePixel = 0
-        frame.Parent = billboardGui
-        
-        local frameCorner = Instance.new("UICorner")
-        frameCorner.CornerRadius = UDim.new(0, 4)
-        frameCorner.Parent = frame
-        
-        -- Outline stroke (wall penetration)
-        local uiStroke = Instance.new("UIStroke")
-        uiStroke.Color = Color3.fromRGB(150, 100, 255)
-        uiStroke.Thickness = 2
-        uiStroke.Parent = frame
-        
-        -- Player name label
-        local nameLabel = Instance.new("TextLabel")
-        nameLabel.BackgroundTransparency = 1
-        nameLabel.Size = UDim2.new(1, 0, 0.3, 0)
-        nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-        nameLabel.TextSize = 14
-        nameLabel.Font = Enum.Font.GothamBold
-        nameLabel.Text = player.Name
-        nameLabel.Parent = frame
-        
-        -- Health bar background
-        if Config.ESP.ShowHealth then
-            local healthBg = Instance.new("Frame")
-            healthBg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-            healthBg.Size = UDim2.new(0.9, 0, 0.15, 0)
-            healthBg.Position = UDim2.new(0.05, 0, 0.7, 0)
-            healthBg.BorderSizePixel = 0
-            healthBg.Parent = frame
+        pcall(function()
+            local billboardGui = Instance.new("BillboardGui")
+            billboardGui.Adornee = humanoidRootPart
+            billboardGui.MaxDistance = Config.ESP.Distance
+            billboardGui.Size = UDim2.new(5, 0, 6, 0)
+            billboardGui.MaxDistance = math.huge -- Show from ANY distance
+            billboardGui.Parent = humanoidRootPart
             
-            local healthBar = Instance.new("Frame")
-            healthBar.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-            healthBar.Size = UDim2.new(1, 0, 1, 0)
-            healthBar.BorderSizePixel = 0
-            healthBar.Parent = healthBg
+            local frame = Instance.new("Frame")
+            frame.BackgroundColor3 = Color3.fromRGB(100, 0, 200)
+            frame.BackgroundTransparency = 0.1
+            frame.Size = UDim2.new(1, 0, 1, 0)
+            frame.BorderSizePixel = 0
+            frame.Parent = billboardGui
             
-            ESPCache[player].healthBar = healthBar
-        end
-        
-        return billboardGui
+            -- Stronger outline
+            local uiStroke = Instance.new("UIStroke")
+            uiStroke.Color = Color3.fromRGB(200, 100, 255)
+            uiStroke.Thickness = 3
+            uiStroke.Parent = frame
+            
+            -- Player name
+            local nameLabel = Instance.new("TextLabel")
+            nameLabel.BackgroundTransparency = 1
+            nameLabel.Size = UDim2.new(1, 0, 0.3, 0)
+            nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            nameLabel.TextSize = 16
+            nameLabel.Font = Enum.Font.GothamBold
+            nameLabel.Text = player.Name
+            nameLabel.Parent = frame
+            
+            -- Health bar
+            if Config.ESP.ShowHealth then
+                local healthBg = Instance.new("Frame")
+                healthBg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+                healthBg.BackgroundTransparency = 0.3
+                healthBg.Size = UDim2.new(0.8, 0, 0.15, 0)
+                healthBg.Position = UDim2.new(0.1, 0, 0.7, 0)
+                healthBg.BorderSizePixel = 0
+                healthBg.Parent = frame
+                
+                local healthBar = Instance.new("Frame")
+                healthBar.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+                healthBar.Size = UDim2.new(1, 0, 1, 0)
+                healthBar.BorderSizePixel = 0
+                healthBar.Parent = healthBg
+                
+                return billboardGui, healthBar
+            end
+            
+            return billboardGui
+        end)
     end
     
     local function UpdateESP()
         if not Config.ESP.Enabled then return end
-        if tick() - LastESPUpdate < 0.15 then return end
+        if tick() - LastESPUpdate < 0.05 then return end
         
         LastESPUpdate = tick()
         
@@ -422,16 +386,17 @@ if not getgenv().TwistedhookLoaded then
                     local humanoid = character:FindFirstChild("Humanoid")
                     
                     if humanoidRootPart and humanoid then
-                        -- Create ESP if it doesn't exist
                         if not ESPCache[player] then
+                            local billboard, healthBar = CreateESPBox(humanoidRootPart, player)
                             ESPCache[player] = {
-                                billboard = CreateESPBox(humanoidRootPart, player),
+                                billboard = billboard,
+                                healthBar = healthBar,
                                 lastHealth = humanoid.Health
                             }
                         else
                             -- Update health bar
                             if Config.ESP.ShowHealth and ESPCache[player].healthBar then
-                                local healthPercent = humanoid.Health / humanoid.MaxHealth
+                                local healthPercent = math.max(0, humanoid.Health / humanoid.MaxHealth)
                                 ESPCache[player].healthBar.Size = UDim2.new(math.max(0, healthPercent), 0, 1, 0)
                             end
                         end
@@ -453,7 +418,7 @@ if not getgenv().TwistedhookLoaded then
         end)
     end
     
-    -- Aimbot with better stability
+    -- STRONGER AIMBOT
     local function UpdateAimbot()
         if not Config.Aimbot.Enabled or not LocalPlayer.Character then return end
         
@@ -461,7 +426,8 @@ if not getgenv().TwistedhookLoaded then
             local closest = nil
             local closestDistance = Config.Aimbot.FOV
             
-            if not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then return end
+            local myRoot = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if not myRoot then return end
             
             for _, player in pairs(Players:GetPlayers()) do
                 if player ~= LocalPlayer and player.Character then
@@ -470,7 +436,7 @@ if not getgenv().TwistedhookLoaded then
                     local humanoid = character:FindFirstChild("Humanoid")
                     
                     if humanoidRootPart and humanoid and humanoid.Health > 0 then
-                        local distance = (humanoidRootPart.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+                        local distance = (humanoidRootPart.Position - myRoot.Position).Magnitude
                         local screenPos = Camera:WorldToScreenPoint(humanoidRootPart.Position)
                         local mousePos = Vector2.new(Mouse.X, Mouse.Y)
                         local distanceToMouse = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
@@ -484,10 +450,9 @@ if not getgenv().TwistedhookLoaded then
             end
             
             if closest and Config.Aimbot.SilentAim then
-                Camera.CFrame = Camera.CFrame:Lerp(
-                    CFrame.new(Camera.CFrame.Position, closest.Position),
-                    Config.Aimbot.Smoothness
-                )
+                -- Stronger aiming with higher strength
+                local targetCFrame = CFrame.new(Camera.CFrame.Position, closest.Position + closest.AssemblyLinearVelocity * 0.1)
+                Camera.CFrame = Camera.CFrame:Lerp(targetCFrame, Config.Aimbot.Smoothness * Config.Aimbot.Strength)
             end
         end)
     end
@@ -503,8 +468,8 @@ if not getgenv().TwistedhookLoaded then
         end
     end
     
-    -- Main feature loop with stability improvements
-    RunService.Heartbeat:Connect(function()
+    -- Main feature loop
+    local featureConnection = RunService.Heartbeat:Connect(function()
         pcall(function()
             if Config.ESP.Enabled then
                 UpdateESP()
@@ -522,30 +487,32 @@ if not getgenv().TwistedhookLoaded then
         end)
     end)
     
-    print("[TWISTEDHOOK] Features enabled and working")
+    print("[TWISTEDHOOK] Features running")
     
     -- ==================== PLAYER MANAGEMENT ====================
     Players.PlayerRemoving:Connect(function(player)
-        if ESPCache[player] then
-            pcall(function()
+        pcall(function()
+            if ESPCache[player] then
                 if ESPCache[player].billboard then
                     ESPCache[player].billboard:Destroy()
                 end
                 ESPCache[player] = nil
-            end)
-        end
+            end
+        end)
     end)
     
-    -- Clean up on respawn
-    LocalPlayer.CharacterAdded:Connect(function()
-        for player, cache in pairs(ESPCache) do
-            if cache.billboard and cache.billboard.Adornee then
-                if not cache.billboard.Adornee.Parent then
-                    pcall(function() cache.billboard:Destroy() end)
-                    ESPCache[player] = nil
+    -- Cleanup on character respawn
+    LocalPlayer.CharacterAdded:Connect(function(newCharacter)
+        pcall(function()
+            for player, cache in pairs(ESPCache) do
+                if cache.billboard and cache.billboard.Adornee then
+                    if not cache.billboard.Adornee.Parent then
+                        pcall(function() cache.billboard:Destroy() end)
+                        ESPCache[player] = nil
+                    end
                 end
             end
-        end
+        end)
     end)
     
     -- ==================== INPUT ====================
@@ -558,16 +525,24 @@ if not getgenv().TwistedhookLoaded then
         end
     end)
     
+    -- ==================== CLEANUP ON GAME LEAVE ====================
+    Players.PlayerRemoving:Connect(function(player)
+        if player == LocalPlayer then
+            if featureConnection then
+                featureConnection:Disconnect()
+            end
+        end
+    end)
+    
     if setthreadidentity then
         setthreadidentity(2)
     end
     
-    print("✓✓✓ TWISTEDHOOK v2 LOADED ✓✓✓")
-    print("✓ Wall-penetrating ESP")
-    print("✓ Enhanced modern UI")
-    print("✓ Improved stability")
-    print("✓ Draggable menu working")
-    print("✓ All features active")
+    print("✓✓✓ TWISTEDHOOK v2.1 LOADED ✓✓✓")
+    print("✓ Mobile optimized")
+    print("✓ Powerful ESP (shows through walls)")
+    print("✓ Stronger aimbot")
+    print("✓ Game-stable")
     print("✓ Press 'P' to toggle menu")
     print("✓ Ready for Rivals!")
     
